@@ -119,8 +119,14 @@ class StoreController:
 		wlan.active(True)
 
 		availableNetworks = set()
-		for result in wlan.scan():
-			availableNetworks.add(result[0].decode('utf-8'))
+		scan = wlan.scan()
+		for result in scan:
+			try:
+				ssid = result[0].decode('utf-8')
+			except:
+				ssid = result[0]
+			finally:
+				availableNetworks.add(ssid)
 
 		i = 0
 		if not wlan.isconnected():
@@ -132,7 +138,7 @@ class StoreController:
 				wlan.connect(ssid, password)
 				while not wlan.isconnected():
 					i += 1
-					if i > 100:
+					if i > 1000:
 						print('Failed connecting to wlan', ssid)
 						break
 					machine.idle()
@@ -141,7 +147,7 @@ class StoreController:
 					break
 
 			if not wlan.isconnected():
-				print('Connecting to wlan failed...')
+				print('Connecting to wlan failed... Status: ', wlan.status())
 				j = 0
 				while j < 10:
 					if self._led.value():
